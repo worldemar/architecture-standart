@@ -1,0 +1,52 @@
+@startgantt
+!theme sunlust
+title Roadmap банка "Стандарт"
+
+<style>
+ganttDiagram {
+  task {
+    BackGroundColor Lime
+    LineColor Black 
+  }
+  undone {
+    BackGroundColor Red
+  }
+}
+</style>
+
+printscale daily with calendar date
+weeks starts on Monday and must have at leasr 5 days
+saturday are closed
+sunday are closed
+
+Project starts the 1st of january 2026
+
+-- Система 1 --
+
+[Задача 1] as [s1t1] lasts 2 weeks
+[Задача 2] as [s1t2] lasts 3 weeks
+[Задача 3] as [s1t3] lasts 4 weeks
+[Задача 4] as [s1t4] lasts 2 week
+
+[s1t1] -> [s1t2]
+[s1t2] -> [s1t4]
+[s1t3] -> [s1t4]
+
+-- Система 2 --
+
+[Задача 1] as [s2t1] lasts 1 weeks
+[Задача 2] as [s2t2] lasts 2 weeks
+[Задача 4] as [s2t4] lasts 2 weeks
+[Задача 3] as [s2t3] lasts 6 weeks
+
+[s2t1] -> [s2t2]
+[s2t2] -> [s2t4]
+[s2t3] -> [s2t4]
+
+[s2t4] is colored in lime/black
+[s2t3] is 67% completed
+
+[Finishing milestone] happens at [s1t2]'s end
+[Finishing milestone] happens at [s2t3]'s end
+
+@endgantt
