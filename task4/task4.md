@@ -35,7 +35,9 @@
 ### 3. Подготовка RoadMap
 Подготовьте RoadMap в draw.io. Это схема последовательности выполнения задач для MVP на горизонте 6 месяцев с учётом изменений в новом кейсе и целевого решения на горизонте года.
 
-**Пример формата**: [RoadMap_bank_Standart.drawio](RoadMap_bank_Standart_template.drawio), [RoadMap_bank_Standart.puml](RoadMap_bank_Standart_template.puml)
+**Пример формата**: [roadmap-template.drawio](roadmap-template.drawio), [roadmap-template.puml](roadmap-template.puml)
+
+![roadmap-template](roadmap-template.png)
 
 ## Результат
 

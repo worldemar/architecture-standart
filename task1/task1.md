@@ -54,7 +54,7 @@
 
 ## Материалы
 
-[Карта бизнес-возможностей (Business Capability Map)](Business_Capability_Map.puml)
+![Карта бизнес-возможностей (Business Capability Map)](doc/business-capability-map.png)
 
 ## Что нужно сделать
 
@@ -69,4 +69,6 @@
 
 ## Результат
 
-Когда всё будет готово, загрузите артефакты в директорию Task1 в рамках пул-реквеста.
+![Шаблон бизнес-модели](doc/business-model-canvas.png)
+![Карта текущего IT-ландшафта](doc/it-landscape-map.png)
+![Схема интеграции приложений](doc/application-integration-map.png)

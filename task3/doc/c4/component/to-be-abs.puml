@@ -1,0 +1,77 @@
+@startuml
+
+!include <C4/C4_Component>
+!include common/c4-custom-rel.iuml
+!include common/theme.iuml
+
+skinparam nodesep 64
+skinparam ranksep 64
+skinparam style strictuml
+skinparam NoteTextAlignment left
+<style>
+root{
+    Margin: 32
+}
+ComponentDiagram {
+    FontName: $FONT_NAME_LARGE
+}
+Arrow {
+    LineColor: Gray
+    LineThickness: 3
+    FontStyle: bold
+}
+Interface {
+    backgroundColor: $SYSTEM_BG_COLOR
+    .ext {
+        backgroundColor: $EXTERNAL_SYSTEM_BG_COLOR
+    }
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+Note {
+    BackgroundColor: cornsilk
+}
+</style>
+
+title Диаграмма Компонентов\nМонолит АБС
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+Person(back_office, "Бэк-офис", "100 человек")
+Person(front_office, "Фронт-офис", "500 человек в 50 отделений")
+Container_Boundary(abs.core, "АБС\nСервер") {
+    Component(abs.core.monolith, "Монолитный\nсервер", "Delphi")
+    ComponentDb(abs.core.db, "База данных", "Oracle")
+}
+
+Container(payments, "Микросервис\nплатежей", "PHP")
+Container(sms_gateway, "СМС\nшлюз")
+System_Ext(call_center_platform, "Платформа для колл-центра", "//React.js, Java Spring, PostgreSQL//")
+Container(orders, "Микросервис\nзаявок", "PHP")
+System_Ext(telecom_operator, "Телеком-оператор", "")
+
+
+' ' TODO: в задании не указано как именно система колл-центра связывается с абс для передачи заявок
+
+Rel_D(abs.core.monolith, abs.core.db, "SQL")
+
+Rel_R(back_office, abs.core.monolith, "Delphi UI", "RPC")
+Rel_R(front_office, abs.core.monolith, "Delphi UI", "RPC")
+Lay_D(back_office, front_office)
+Lay_R(back_office, sms_gateway)
+
+Rel_D(orders, call_center_platform, "REST", "HTTPS")
+call_center_platform -l[dotted,norank]-> abs.core.monolith
+Rel_L(orders, abs.core.monolith, "Ingress\nЗаявок")
+Rel_U(orders, sms_gateway, "pub-sub")
+
+Rel_U(payments, abs.core.db, "SQL")
+Rel_U(abs.core.monolith, sms_gateway, "RPC")
+
+Rel_R(sms_gateway, telecom_operator, "API оператора")
+
+@enduml
+
+

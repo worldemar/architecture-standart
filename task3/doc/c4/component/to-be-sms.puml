@@ -1,0 +1,66 @@
+@startuml
+
+!include <C4/C4_Component>
+!include common/c4-custom-rel.iuml
+!include common/theme.iuml
+
+' LAYOUT_WITH_LEGEND()
+
+skinparam nodesep 64
+skinparam ranksep 64
+skinparam NoteTextAlignment left
+<style>
+root{
+    Margin: 32
+}
+ComponentDiagram {
+    FontName: $FONT_NAME_LARGE
+}
+Arrow {
+    LineColor: Gray
+    LineThickness: 3
+    FontStyle: bold
+}
+Interface {
+    backgroundColor: $SYSTEM_BG_COLOR
+    .ext {
+        backgroundColor: $EXTERNAL_SYSTEM_BG_COLOR
+    }
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+Note {
+    BackgroundColor: cornsilk
+}
+</style>
+
+AddRelTag("interface", $lineThickness="8", $lineColor=$SYSTEM_BG_COLOR)
+AddRelTag("interface-ext", $lineThickness="8", $lineColor=$EXTERNAL_SYSTEM_BG_COLOR)
+
+title Диаграмма Компонентов\nСМС Шлюз
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+Container(abs.core, "АБС\nСервер", "Delphi", "Монолит")
+Container(orders, "Микросервис\nзаявок", "PHP")
+System_Ext(telecom_operator, "Телеком-оператор", "")
+Container_Boundary(sms, "СМС\nшлюз") {
+    ComponentQueue(sms.queue, "Очередь СМС", "Redis / Kafka", "предоставляет очередь для отправки СМС, новый способ отправки сообщений")
+    Component(sms.worker, "обработчик СМС", "PHP")
+    Component(sms.api_adapter, "Адаптер протокола\nтелеком-оператора")
+    Component(sms.abs_adapter, "Адаптер\nстарого\nпротокола\nАБС", "PHP / Delphi", "обеспечивает возможность отправки СМС из монолита старым способом")
+}
+
+Rel_R(orders, sms.queue, "pub-sub")
+Rel_R(abs.core, sms.abs_adapter, "RPC")
+Rel_U(sms.abs_adapter, sms.queue, "pub-sub")
+
+Rel_D(sms.worker, sms.queue, "pub-sub")
+Rel_U(sms.worker, sms.api_adapter, "REST", "HTTP")
+Rel_R(sms.api_adapter, telecom_operator, "API оператора")
+
+@enduml
+
+

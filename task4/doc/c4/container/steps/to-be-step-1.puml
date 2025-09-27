@@ -1,0 +1,106 @@
+@startuml
+
+!include <C4/C4_Container>
+!include common/c4-custom-rel.iuml
+!include common/theme.iuml
+
+LAYOUT_WITH_LEGEND()
+
+skinparam nodesep 64
+skinparam style strictuml
+skinparam NoteTextAlignment left
+<style>
+root{
+    Margin: 32
+}
+ComponentDiagram {
+    FontName: $FONT_NAME_LARGE
+}
+Arrow {
+    LineColor: Gray
+    LineThickness: 3
+    FontStyle: bold
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+Note {
+    BackgroundColor: cornsilk
+}
+</style>
+
+title Диаграмма Контейнеров\nЭтап 1: Исключение Excel из рабочего процесса
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+Person(back_office, "Бэк-офис", "100 человек")
+Person(front_office, "Фронт-офис", "500 человек в 50 отделений")
+
+Container(abs.core, "АБС\nСервер", "Delphi", "Монолит")
+ContainerDb(abs.db, "АБС\nБаза данных", "Oracle")
+
+Container(sms_gateway, "СМС\nшлюз")
+Container(website, "Веб-сайт", "PHP, React.js")
+Container(internet_bank, "Интернет-банк", "ASP.NET, MVC 4.5")
+Container(rates, "Система\nрасчёта\nставок", "PHP, React.js, Oracle")
+note as rates_note
+Новая система расчёта ставок заменяет одновременно три компонента:
+- XLS для расчёта ставок
+- Хранилище файлов
+- Почтовый сервер для обмена информацией о ставках
+endnote
+rates_note .u. rates
+Lay_R(rates_note, front_office)
+
+Container_Boundary(mail, "Почтовый\nсервер")
+note as note.mail
+Удаление почтового сервера из банка не подразумевается,
+но в процессах работы с клиентами он больше участвовать не будет.
+endnote
+note.mail .d. mail
+Lay_R(mail, rates)
+
+System_Ext(central_bank, "Центробанк", "Рассылка банковской информации")
+Person(call_center_ops, "Колл-центр банка «Стандарт»", "200 операторов")
+System_Ext(call_center_platform, "Платформа для колл-центра", "//React.js, Java Spring, PostgreSQL//")
+
+System_Ext(telecom_operator, "Телеком-оператор", "")
+
+Person_Ext(senior_visitor, "Клиенты\nстаршего\nвозраста")
+Person_Ext(digital_visitor, "Клиенты\nмолодого\nвозраста")
+
+Rel_D(central_bank, back_office, "email", "Excel-файл")
+
+Rel_U(call_center_ops, call_center_platform, "Web UI")
+
+' ' TODO: в задании не указано как именно система колл-центра связывается с абс для передачи заявок
+Rel_L(call_center_platform, abs.core, "Ingress\nЗаявок")
+Rel_D(back_office, abs.core, "Delphi UI", "RPC")
+Rel_D(back_office, rates, "Web UI\nClient")
+back_office .d. mail
+
+Rel_D(abs.core, abs.db, "SQL")
+Rel_U(abs.core, sms_gateway, "RPC")
+Rel_U(sms_gateway, telecom_operator, "API оператора")
+
+Rel_U(internet_bank, abs.db, "SQL")
+
+Rel_U(digital_visitor, internet_bank, "Web UI")
+Rel_U(digital_visitor, website, "Web UI")
+Lay_R(internet_bank, website)
+
+mail .d. front_office
+Rel_U(front_office, abs.core, "Delphi UI", "RPC")
+Rel_U(front_office, rates, "Web UI\nClient")
+Rel_U(senior_visitor, front_office, "личное\nобщение")
+
+Lay_R(mail, abs.core)
+
+Container_Boundary(all, "Все новые\nмикросервисы")
+Container(monitoring, "Система мониторинга и журналирования", "Prometheus+Grafana, ELK")
+ARel(all, monitoring, "журналы", $arrow="-d->")
+
+@enduml
+
+

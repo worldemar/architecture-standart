@@ -1,0 +1,65 @@
+@startuml
+
+!include <C4/C4_Component>
+!include common/c4-custom-rel.iuml
+!include common/theme.iuml
+
+skinparam nodesep 64
+skinparam ranksep 64
+skinparam style strictuml
+skinparam NoteTextAlignment left
+<style>
+root{
+    Margin: 32
+}
+ComponentDiagram {
+    FontName: $FONT_NAME_LARGE
+}
+Arrow {
+    LineColor: Gray
+    LineThickness: 3
+    FontStyle: bold
+}
+Interface {
+    backgroundColor: $SYSTEM_BG_COLOR
+    .ext {
+        backgroundColor: $EXTERNAL_SYSTEM_BG_COLOR
+    }
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+Note {
+    BackgroundColor: cornsilk
+}
+</style>
+
+title Диаграмма Компонентов\nИнтернет-банк
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+Container(payments, "Микросервис\nплатежей", "PHP")
+Container_Boundary(internet_bank, "Интернет-банк") {
+    Component(internet_bank.sms_cache, "Кэш", "Redis / memcached", "CMC, Заявки, Платежи")
+    Component(internet_bank.backend, "Бэкенд интернет-банка", "")
+    Component(internet_bank.webui, "Веб-интерфейс","ASP.NET")
+    Rel_U(internet_bank.webui, internet_bank.backend, "REST", "HTTPS")
+    BiRel_R(internet_bank.sms_cache, internet_bank.backend, "")
+
+}
+Container(rates, "Система\nрасчёта\nставок", "PHP, React.js, Oracle")
+Container(orders, "Микросервис\nзаявок", "PHP")
+Person_Ext(digital_visitor, "Клиенты\nмолодого\nвозраста")
+Container(cdn, "CDN", "Nginx")
+
+' ' TODO: в задании не указано как именно система колл-центра связывается с абс для передачи заявок
+Rel_U(internet_bank.backend, payments, "REST", "HTTPS")
+Rel_U(internet_bank.backend, orders, "REST", "HTTPS")
+Rel_U(internet_bank.backend, rates, "REST", "HTTPS")
+Rel_U(digital_visitor, internet_bank.webui, "Web UI")
+Rel_L(cdn, internet_bank.webui, "Статический\nконтент", "HTTP")
+
+@enduml
+
+
