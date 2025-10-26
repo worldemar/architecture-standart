@@ -1,13 +1,50 @@
-@startuml
-!theme sunlust
-package "Продажи и маркетинг" {
-    [Продажи в сети отделений]
-    [Продажи через колл-центр]
-    [Digital-оповещения клиентов]
+@startwbs
+!include common/theme.iuml
+
+<style>
+WBSDiagram {
+    Padding: $FONT_SIZE_LARGE
+    HorizontalAlignment: Center
+    .top {
+        FontName: $FONT_NAME_LARGE
+        FontSize: $FONT_SIZE_LARGE
+        MaximumWidth: 500
+        BackgroundColor: $COLOR_ELEMENT0
+        LineColor: $COLOR_ELEMENT0
+    }
+    .category {
+        FontName: $FONT_NAME_MEDIUM
+        FontSize: $FONT_SIZE_MEDIUM
+        MaximumWidth: 300
+        BackgroundColor: $COLOR_ELEMENT2
+        LineColor: $COLOR_ELEMENT0
+    }
+    .capability {
+        FontName: $FONT_NAME_SMALL
+        FontSize: $FONT_SIZE_SMALL
+        MaximumWidth 200
+        BackgroundColor: $COLOR_ELEMENT4
+        LineColor: $COLOR_ELEMENT0
+    }
 }
-package "Поддержка операционных процессов" {
-    [Обслуживание депозитных процессов]
-    [Обслуживание кредитных процессов]
-    [Управление договорами]
+Title {
+    Margin: 0
+    Padding: 0
 }
-@enduml
+</style>
+
+title Карта Бизнес-Возможностей\nБанк «Стандарт»
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
++ Банк «Стандарт» <<top>>
+-- Продажи и маркетинг <<category>>
+-++ Продажи в сети отделений <<capability>>
+-++ Продажи через колл-центр <<capability>>
+-++ Digital-оповещения клиентов <<capability>>
+++ Поддержка операционных процессов <<category>>
++++ Обслуживание депозитных процессов <<capability>>
++++ Обслуживание кредитных процессов <<capability>>
++++ Управление договорами <<capability>>
+
+@endwbs

@@ -1,0 +1,81 @@
+@startuml
+
+!include <C4/C4_Deployment>
+!include common/c4-custom-rel.iuml
+!include common/theme.iuml
+
+skinparam nodesep 96
+skinparam ranksep 96
+skinparam style strictuml
+skinparam NoteTextAlignment left
+
+<style>
+root{
+    Margin: 32
+}
+Arrow {
+    LineColor: Gray
+    LineThickness: 3
+    FontStyle: bold
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+Note {
+    BackgroundColor: cornsilk
+}
+</style>
+
+title Диаграмма Развёртывания\nЦифровизация депозитного направления (MVP)
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+Person_Ext(digital_visitor, "Клиенты банка", "Онлайн-пользователи")
+
+Node(balancer_host, "Хостинг\nбалансировщика") {
+    Container(balancer, "HAProxy")
+}
+
+Node(dc1, "ЦОД 1", "Основной") {
+    Container(dc1.website, "Веб-сайт", "PHP, React.js")
+    Container(dc1.internet_bank, "Интернет-банк", "ASP.NET, MVC 4.5")
+    Container(dc1.cdn, "CDN", "Nginx")
+}
+
+Node(dc2, "ЦОД 2", "Дополнительный") {
+    Container(dc2.cdn, "CDN", "Nginx")
+    Container(dc2.internet_bank, "Интернет-банк", "ASP.NET, MVC 4.5")
+    Container(dc2.website, "Веб-сайт", "PHP, React.js")
+}
+
+Node(bank_infrastructure, "Инфраструктура банка") {
+    Container(rates, "Система\nрасчёта\nставок", "PHP, React.js, Oracle")
+    Container(orders, "Микросервис\nзаявок", "PHP")
+} 
+
+Rel_D(digital_visitor, balancer, "HTTPS")
+
+Rel_D(balancer, dc1.website, "HTTPS")
+Rel_D(balancer, dc1.internet_bank, "HTTPS")
+Rel_D(balancer, dc1.cdn, "HTTPS")
+Rel_D(balancer, dc2.website, "HTTPS")
+Rel_D(balancer, dc2.internet_bank, "HTTPS")
+Rel_D(balancer, dc2.cdn, "HTTPS")
+
+Rel_D(dc1.website, orders, "REST", "HTTPS")
+Rel_D(dc1.website, rates, "REST", "HTTPS")
+Rel_D(dc1.internet_bank, orders, "REST", "HTTPS")
+Rel_D(dc1.internet_bank, rates, "REST", "HTTPS")
+
+Rel_D(dc2.website, orders, "REST", "HTTPS")
+Rel_D(dc2.website, rates, "REST", "HTTPS")
+Rel_D(dc2.internet_bank, orders, "REST", "HTTPS")
+Rel_D(dc2.internet_bank, rates, "REST", "HTTPS")
+
+Lay_D(orders, rates)
+
+@enduml
+
+
+

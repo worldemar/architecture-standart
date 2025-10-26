@@ -1,0 +1,133 @@
+@startuml
+
+<style>
+root {
+    Margin: 0
+}
+activityDiagram {
+    BackgroundColor: ivory
+    FontName: "Century Gothic"
+}
+Activity {
+    LineColor: Transparent
+    Padding: 0
+}
+Title {
+    Margin: 0
+    Padding: 0
+}
+Arrow {
+    LineColor: Transparent
+}
+</style>
+
+!$FURPS_COLOR={
+    "Код" : "#Transparent",
+    "F": "#A0FFA0",
+    "U": "#FFFF00",
+    "R": "#FFA000",
+    "P": "#A0A0FF",
+    "S": "#FFA0A0",
+    "+R": "#FFA0FF"
+}
+!$FURPS_TITLE={
+    "Код" : "Требования",
+    "F"   : "Функциональные / Functionality",
+    "U"   : "Удобство использования / Usability",
+    "R"   : "Надёжность / Reliability",
+    "P"   : "Производительность / Performance",
+    "S"   : "Поддерживаемость / Supportability",
+    "+R"  : "+ Ограничения / Restrictions"
+}
+!$FURPS_SUB_TITLE={
+    "Код" : "",
+    "F"   : "",
+    "U"   : "",
+    "R"   : "",
+    "P"   : "",
+    "S"   : "",
+    "+R"  : ""
+}
+!$FURPS_INDEX={ "F": 1, "U": 1, "R": 1, "P": 1, "S": 1, "+R": 1 }
+!$FURPS_THIRD_COLUMN=""
+
+!procedure $header($code, $text)
+!$FURPS_SUB_TITLE=%json_set($FURPS_SUB_TITLE, $code, $text)
+!$additional_title = ""
+!if %strlen($FURPS_SUB_TITLE[$code]) > 0
+    !$additional_title = " - " + $FURPS_SUB_TITLE[$code]
+!endif
+|=<$FURPS_COLOR[$code]><font:Consolas><size:16><b> $code |=<$FURPS_COLOR[$code]> $FURPS_TITLE[$code] $additional_title |=<$FURPS_COLOR[$code]>$FURPS_THIRD_COLUMN |
+!endprocedure
+
+!function $pad($len, $integer)
+!$string = %string($integer)
+!while %strlen($string) < $len
+    !$string = "0" + $string
+!endwhile
+!return $string
+!endfunction
+
+!procedure $row($code, $requirement, $comment)
+!$prefix = ""
+!if %strlen($FURPS_SUB_TITLE[$code]) > 0
+    !$prefix = " [ " + $FURPS_SUB_TITLE[$code] + " ] "
+!endif
+|<$FURPS_COLOR[$code]><font:Consolas><size:16> $code$pad(3, $FURPS_INDEX[$code]) |<$FURPS_COLOR[$code]> $prefix $requirement |<$FURPS_COLOR[$code]> $comment |
+!$FURPS_INDEX=%json_set($FURPS_INDEX, $code, %intval($FURPS_INDEX[$code]) + 1)
+!endprocedure
+
+!procedure $header($extra)
+!$FURPS_THIRD_COLUMN=$extra
+$header("Код", "")
+!endprocedure
+
+!procedure Functionality($text)
+$header("F", $text)
+!endprocedure
+
+!procedure Usability($text)
+$header("U", $text)
+!endprocedure
+
+!procedure Reliability($text)
+$header("R", $text)
+!endprocedure
+
+!procedure Performance($text)
+$header("P", $text)
+!endprocedure
+
+!procedure Supportability($text)
+$header("S", $text)
+!endprocedure
+
+!procedure Restrictions($text)
+$header("+R", $text)
+!endprocedure
+
+!procedure $functionality($text, $comment)
+$row("F", $text, $comment)
+!endprocedure
+
+!procedure $usability($text, $comment)
+$row("U", $text, $comment)
+!endprocedure
+
+!procedure $reliability($text, $comment)
+$row("R", $text, $comment)
+!endprocedure
+
+!procedure $performance($text, $comment)
+$row("P", $text, $comment)
+!endprocedure
+
+!procedure $supportability($text, $comment)
+$row("S", $text, $comment)
+!endprocedure
+
+!procedure $restrictions($text, $comment)
+$row("+R", $text, $comment)
+!endprocedure
+
+@enduml

@@ -1,0 +1,128 @@
+@startuml
+
+!include <C4/C4_Container>
+!include common/c4-custom-rel.iuml
+!include common/theme.iuml
+
+LAYOUT_WITH_LEGEND()
+
+skinparam nodesep 64
+skinparam ranksep 64
+skinparam style strictuml
+skinparam NoteTextAlignment left
+<style>
+root{
+    Margin: 32
+}
+ComponentDiagram {
+    FontName: $FONT_NAME_LARGE
+}
+Arrow {
+    LineColor: Gray
+    LineThickness: 3
+    FontStyle: bold
+}
+Interface {
+    backgroundColor: $SYSTEM_BG_COLOR
+    .ext {
+        backgroundColor: $EXTERNAL_SYSTEM_BG_COLOR
+    }
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+Note {
+    BackgroundColor: cornsilk
+}
+</style>
+
+AddRelTag("interface", $lineThickness="8", $lineColor=$SYSTEM_BG_COLOR)
+AddRelTag("interface-ext", $lineThickness="8", $lineColor=$EXTERNAL_SYSTEM_BG_COLOR)
+
+title Диаграмма Контейнеров\nЭтап 5: Обеспечение быстродействия
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+Person(back_office, "Бэк-офис", "100 человек")
+Person(front_office, "Фронт-офис", "500 человек в 50 отделений")
+
+Container(abs.core, "АБС\nСервер", "Delphi", "Монолит")
+Container(payments, "Микросервис\nплатежей", "PHP")
+
+Container(sms_gateway, "СМС\nшлюз")
+Container(website, "Веб-сайт", "PHP, React.js")
+Container(internet_bank, "Интернет-банк", "ASP.NET, MVC 4.5")
+Container(rates, "Система\nрасчёта\nставок", "PHP, React.js, Oracle")
+Lay_R(rates, abs.core)
+
+System_Ext(central_bank, "Центробанк", "Рассылка банковской информации")
+Person(call_center_ops, "Колл-центр банка «Стандарт»", "200 операторов")
+System_Ext(call_center_platform, "Платформа для колл-центра", "//React.js, Java Spring, PostgreSQL//")
+Container(orders, "Микросервис\nзаявок", "PHP")
+
+System_Ext(telecom_operator, "Телеком-оператор", "")
+
+Person_Ext(senior_visitor, "Клиенты\nстаршего\nвозраста")
+Person_Ext(digital_visitor, "Клиенты\nмолодого\nвозраста")
+
+Container(cdn, "CDN", "Nginx")
+note as cdn_note
+Для ускорения загрузки страниц используется CDN. Для MVP это может быть простой Nginx на достаточно быстром хостинге.
+endnote
+cdn_note .d. cdn
+Lay_D(call_center_ops, cdn_note)
+
+Container(balancer, "Балансировщик\nнагрузки", "HAProxy")
+note as balancer_note
+Для балансировки нагрузки используется HAProxy. На схеме имеется в виду, что он балансирует интернет-банк и веб-сайт, каждый на разных ЦОД, а не нагрузку между микросервисами.
+endnote
+balancer_note .d. balancer
+Lay_D(senior_visitor, balancer_note)
+
+
+Rel_D(central_bank, back_office, "email", "Excel-файл")
+
+Rel_U(call_center_ops, call_center_platform, "Web UI")
+
+' ' TODO: в задании не указано как именно система колл-центра связывается с абс для передачи заявок
+Rel_R(orders, call_center_platform, "REST", "HTTPS")
+call_center_platform -[dotted,norank]-> abs.core
+Rel_L(orders, abs.core, "Ingress\nЗаявок")
+Rel_U(orders, sms_gateway, "pub-sub")
+
+Rel_D(back_office, abs.core, "Delphi UI", "RPC")
+Rel_D(back_office, rates, "Web UI\nClient")
+
+Rel_U(payments, abs.core, "SQL")
+Rel_U(abs.core, sms_gateway, "RPC")
+Rel_U(sms_gateway, telecom_operator, "API оператора")
+
+Rel_U(internet_bank, payments, "REST", "HTTPS")
+
+Rel_U(website, orders, "REST", "HTTPS")
+Rel_U(website, rates, "REST", "HTTPS")
+
+ARel(digital_visitor, internet_bank, "Web UI", $arrow="-u->")
+ARel(digital_visitor, website, "Web UI", $arrow="-d->")
+Rel_U(internet_bank, orders, "REST", "HTTPS")
+Rel_U(internet_bank, rates, "REST", "HTTPS")
+
+Rel_R(front_office, abs.core, "Delphi UI", "RPC")
+Rel_R(front_office, rates, "Web UI\nClient")
+Rel_U(senior_visitor, front_office, "личное\nобщение")
+
+
+ARel(cdn, internet_bank, "Статический\nконтент", "HTTP", $arrow="-u->")
+ARel(cdn, website, "Статический\nконтент", "HTTP", $arrow="-d->")
+
+ARel(balancer, internet_bank, "proxy", "HTTP", $arrow="-u->")
+ARel(balancer, website, "proxy", "HTTP", $arrow="-d->")
+
+Container_Boundary(all, "Все новые\nмикросервисы")
+Container(monitoring, "Система мониторинга и журналирования", "Prometheus+Grafana, ELK")
+ARel(all, monitoring, "журналы", $arrow="-d->")
+
+@enduml
+
+

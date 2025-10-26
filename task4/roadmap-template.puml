@@ -1,15 +1,20 @@
 @startgantt
-!theme sunlust
+!include common/theme.iuml
 title Roadmap банка "Стандарт"
 
 <style>
 ganttDiagram {
+    FontColor: Grey
   task {
-    BackGroundColor Lime
+    FontColor: Black
+    BackGroundColor LimeGreen
     LineColor Black 
   }
   undone {
-    BackGroundColor Red
+    BackGroundColor Salmon
+  }
+  arrow {
+    LineColor: Black
   }
 }
 </style>

@@ -1,0 +1,124 @@
+@startsalt
+
+<style>
+root {
+    Margin: 32
+    FontColor: $COLOR_TEXT
+}
+saltDiagram {
+    BackgroundColor: ivory
+    FontName: "Century Gothic"
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+    Padding: 0
+    Margin: 0
+}
+</style>
+
+!procedure $addemmargin($margin, $size, $font, $content)
+!$em_space = "<U+2003>"
+!$emmargin = "<size:" + $margin + ">" + $em_space + "</size>"
+{
+    $emmargin|$emmargin|$emmargin
+    !foreach $str in %splitstr($content, "|")
+        $emmargin|<font:$font><size:$size>$str</size>|$emmargin
+    !endfor
+    $emmargin|$emmargin|$emmargin
+}
+!endprocedure
+
+' procedure for rendering single business-segment within a table cell
+!procedure $segment($icon, $title, $items)
+!$em="<U+2003>"
+    $em
+
+    ' title and large icon
+    .|
+    $addemmargin($FONT_SIZE_SMALL / 2, $FONT_SIZE_HUGE, $FONT_NAME_HUGE, $title)|*|
+    $addemmargin($FONT_SIZE_MEDIUM, $FONT_SIZE_HUGE, "Noto Emoji", "<:" + $icon + ":>")
+
+    $em
+
+    ' items
+    !foreach $item in $items
+        !if $item.name
+            !$color_main = $COLOR_TEXT
+            !$color_sub = $COLOR_TEXT_SUB
+            !if $item.new
+                !$color_main = $COLOR_TEXT_NEW
+                !$color_sub = $COLOR_TEXT_NEW_SUB
+            !endif
+            $em | * <color:$color_main><font:$FONT_NAME_MEDIUM><size:$FONT_SIZE_MEDIUM>$em$item.name | * | $em
+            !if $item.desc
+                $em | <color:$color_sub><font:$FONT_NAME_SMALL><size:$FONT_SIZE_SMALL>$em$em$em$em$em$em$em//$item.desc// | * | $em
+            !else
+                $em | * | * | $em
+            !endif
+        !endif
+    !endfor
+
+    $em
+    $em
+    $em
+!endprocedure
+
+
+!$KeyPartners = [
+]
+!$KeyActivities = [
+]
+!$KeyResources = [
+]
+!$ValuePropositions = [
+]
+!$CustomerRelationships = [
+]
+!$DistributionChannels = [
+]
+!$CustomerSegments = [
+]
+!$CostStructure = [
+]
+!$RevenueStreams = [
+]
+
+legend top right
+' no salt support here, have to use creole
+| <color:$COLOR_TEXT><size:$FONT_SIZE_MEDIUM>Уже существующие элементы</size></color> | <color:$COLOR_TEXT_NEW><size:$FONT_SIZE_MEDIUM>Новые или обновлённые элементы</size></color> |
+endlegend
+
+!procedure $BusinessModelCanvas($KeyPartners, $KeyActivities, $KeyResources, $ValuePropositions, $CustomerRelationships, $DistributionChannels, $CustomerSegments, $CostStructure, $RevenueStreams)
+{#
+  {
+    
+    $segment("handshake", "Ключевые|партнёры", $KeyPartners)
+  }|
+  {
+    $segment("white_check_mark", "Ключевые виды|деятельности", $KeyActivities)
+    --|*|*|*
+    $segment("factory", "Ключевые|ресурсы", $KeyResources)
+  }|
+  {
+    $segment("gift", "Ценностные|предложения", $ValuePropositions)
+  }|
+  {
+    $segment("speech_balloon", "Отношения|с клиентами", $CustomerRelationships)
+    --|*|*|*
+    $segment("truck", "Каналы|сбыта", $DistributionChannels)
+  }|
+  {
+    $segment("family", "Потребительские|сегменты", $CustomerSegments)
+  }
+  {
+    $segment("receipt", "Структура затрат", $CostStructure)
+  }|*|
+  {
+    $segment("moneybag", "Источники доходов", $RevenueStreams)
+  }|*|*|
+}
+!endprocedure
+
+@endsalt
+

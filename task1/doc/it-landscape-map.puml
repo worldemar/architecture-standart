@@ -1,0 +1,60 @@
+@startuml
+
+!include common/theme.iuml
+
+<style>
+Activity {
+    BackgroundColor: Transparent
+    LineThickness: 0.5
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+</style>
+
+' define colors for creole
+!$sales = "<" + %lighten(SkyBlue  , 15) + ">"
+!$ops   = "<" + %lighten(Khaki    , 15) + ">"
+!$org   = "<" + %lighten(CadetBlue, 15) + ">"
+!$ext   = "<" + %lighten(Coral    , 15) + ">"
+!$int   = "<" + %lighten(Gold     , 15) + ">"
+
+' define systems
+!$sys_webbank    = " <:money_with_wings:> **Интернет-банк** \n //ASP.NET, MVC 4.5// "
+!$sys_abs        = " <:desktop_computer:> **АБС** \n //Delphi, Oracle// "
+!$sys_webbankabs = $int + $sys_abs + "\n———————————\n" + $sys_webbank
+!$sys_webbank    = $int + $sys_webbank
+!$sys_abs        = $int + $sys_abs
+!$sys_callcenter = $ext + " <:telephone_receiver:> **Колл-центр подрядчика** (CRM) \n //React.js, Java Spring, PostgreSQL//"
+!$sys_partnercc  = $ext + " <:telephone_receiver:> **Партнёрский колл-центр** \n //сценарии обзвона//"
+!$sys_smsgateway = $ext + " <:calling:> **Телеком-оператор** \n //СМС-шлюз//"
+!$sys_website    = $int + " <:earth_americas:> **Веб-Сайт** \n //PHP, React.js//"
+
+title Карта IT-ландшафта\nТекущая ситуация (as is)
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+:
+| | $ops Обслуживание \n депозитных \n процессов | $ops Обслуживание \n кредитных \n процессов | $ops Управление договорами \n на обслуживание | $sales Продажи \n в сети \n отделений | $sales Продажи \n через \n колл-центр | $sales Digital \n оповещения \n клиентов |
+| $org **Управление обслуживанием** \n **в сети отделений** \n Штат: 500 (в 50 отделений) | $sys_abs | $sys_abs | $sys_abs | $sys_abs |
+| $org\n\n **Управление IT** \n Штат: 10 + 10 | $sys_webbankabs | $sys_abs | $sys_webbankabs | $sys_abs | | $sys_smsgateway |
+| $org\n **Управление обслуживанием** \n **депозитных продуктов** \n Штат: 50 | $sys_webbankabs | $sys_abs | $sys_webbankabs | $sys_abs |
+| $org **Управление обслуживанием** \n **кредитных продуктов** \n Штат: 50 | $sys_abs | $sys_abs | $sys_abs | $sys_abs |
+| $org **Колл-центр банка «Стандарт»** \n Штат: 200 | | | | | $sys_callcenter |
+| $org **Партнёрский кол-центр** \n Штат: 100 | | | | | $sys_partnercc |
+| $org **Команда цифровой трансформации** \n **розничного бизнеса** \n Штат: 10 | $sys_webbank | | | $sys_website | $sys_website |
+;
+
+legend right
+|= Цвет - Категория |
+| $sales Продажи и маркетинг |
+| $ops Поддержка операционных процессов |
+| $org Организационная структура |
+
+|= Цвет - Расположение системы |
+| $int Внутренняя система |
+| $ext Внешняя система |
+endlegend
+
+@enduml

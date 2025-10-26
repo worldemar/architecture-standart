@@ -1,0 +1,94 @@
+@startuml
+
+!include <C4/C4_Context>
+!include common/c4-custom-rel.iuml
+!include common/theme.iuml
+
+LAYOUT_WITH_LEGEND()
+
+skinparam nodesep 64
+<style>
+root{
+    Margin: 32
+}
+ComponentDiagram {
+    FontName: $FONT_NAME_LARGE
+}
+Arrow {
+    LineColor: Gray
+    LineThickness: 3
+    FontStyle: bold
+}
+Interface {
+    backgroundColor: $SYSTEM_BG_COLOR
+    .ext {
+        backgroundColor: $EXTERNAL_SYSTEM_BG_COLOR
+    }
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+</style>
+
+AddRelTag("interface", $lineThickness="8", $lineColor=$SYSTEM_BG_COLOR)
+AddRelTag("interface-ext", $lineThickness="8", $lineColor=$EXTERNAL_SYSTEM_BG_COLOR)
+
+title Диаграмма Контекста\nЦифровизация депозитного направления (to be)
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+Person(back_office, "Бэк-офис", "100 человек")
+Person(front_office, "Фронт-офис", "500 человек в 50 отделений")
+
+System(abs, "IT-инфраструктура банка")
+
+Interface "АБС\nЗаявки" as i_abs_callcenter_ingress
+Interface "Система\nРассчёта Ставок" as rates
+Interface "Delphi RPC" as i_delphi_rpc_back
+Interface "Delphi RPC" as i_delphi_rpc_out
+Interface "Интернет-Банк" as i_internet_bank
+Interface "Сайт" as i_website
+
+System_Ext(central_bank, "Центробанк", "Рассылка банковской информации")
+Person(call_center_ops, "Колл-центр банка «Стандарт»", "200 операторов")
+System_Ext(call_center_platform, "Платформа для колл-центра", "//React.js, Java Spring, PostgreSQL//")
+
+System_Ext(telecom_operator, "Телеком-оператор", "")
+Interface "API оператора" as telecom_operator_api <<ext>>
+
+Person_Ext(senior_visitor, "Клиенты\nстаршего\nвозраста")
+Person_Ext(digital_visitor, "Клиенты\nмолодого\nвозраста")
+
+ARel(abs, i_abs_callcenter_ingress, "", $arrow="-r-", $tags="interface")
+ARel(abs, i_delphi_rpc_back, "", $arrow="-u-", $tags="interface")
+ARel(abs, rates, "", $arrow="-l-", $tags="interface")
+ARel(abs, i_delphi_rpc_out, "", $arrow="-d-", $tags="interface")
+ARel(abs, i_internet_bank, "", $arrow="-d-", $tags="interface")
+ARel(abs, i_website, "", $arrow="-d-", $tags="interface")
+ARel(abs, telecom_operator_api, "", $arrow="-u-(")
+
+ARel(digital_visitor, i_internet_bank, "Web UI", $arrow="-u-(")
+ARel(digital_visitor, i_website, "Web UI", $arrow="-u-(")
+
+ARel(back_office, i_delphi_rpc_back, "Delphi UI", $arrow="-r-(")
+ARel(back_office, rates, "Web UI\nClient", $arrow="-d-(")
+
+ARel(front_office, i_delphi_rpc_out, "Delphi UI", $arrow="-u-(")
+ARel(front_office, rates, "Web UI\nClient", $arrow="-u-(")
+Rel_U(senior_visitor, front_office, "личное\nобщение")
+
+' TODO: в задании не указано как именно система колл-центра связывается с абс для передачи заявок
+ARel(call_center_platform, i_abs_callcenter_ingress, "", $arrow="-l-(")
+
+ARel(telecom_operator, telecom_operator_api, "", $arrow="-d-", $tags="interface-ext")
+
+Rel_U(call_center_ops, call_center_platform, "")
+
+Rel_D(central_bank, back_office, "email", "Excel-файл")
+
+Lay_R(i_delphi_rpc_back, telecom_operator_api)
+Lay_D(telecom_operator_api, i_abs_callcenter_ingress)
+
+@enduml
+

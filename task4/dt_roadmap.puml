@@ -1,0 +1,253 @@
+@startgantt
+
+!include common/theme.iuml
+
+title Дорожная карта MVP\nЦифровизация депозитного направления
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+<style>
+ganttDiagram {
+    FontColor: Grey
+  task {
+    FontColor: Black
+    BackGroundColor LimeGreen
+    LineColor Black 
+  }
+  milestone {
+    FontColor: Black
+    FontStyle: bold
+    BackGroundColor: Gold
+  }
+  undone {
+    BackGroundColor Salmon
+  }
+  arrow {
+    LineColor: Black
+  }
+}
+</style>
+
+printscale daily
+saturday are closed
+sunday are closed
+
+Project starts the 1st of january 2026
+
+-- Этап 0: Инфраструктура мониторинга --
+
+[Установка Prometheus+Grafana] as [mon_prom] lasts 2 weeks
+[Установка ELK Stack] as [mon_elk] lasts 2 weeks
+[Разработка стандартов логирования] as [mon_std] lasts 1 week
+[Настройка алертинга] as [mon_alert] lasts 1 week
+[Тестирование мониторинга] as [mon_test] lasts 1 week
+
+' Prometheus и ELK устанавливаются параллельно
+[mon_elk] starts at [mon_prom]'s start
+[mon_std] starts at [mon_prom]'s end
+[mon_alert] starts at [mon_elk]'s end
+[mon_test] starts at [mon_std]'s end
+[mon_test] starts at [mon_alert]'s end
+
+[Мониторинг готов] as [MS_MONITORING] happens at [mon_test]'s end
+
+-- Этап 1: Система расчёта ставок --
+
+[Проектирование системы ставок] as [rates_design] lasts 2 weeks
+[Разработка БД Oracle] as [rates_db] lasts 2 weeks
+[Разработка backend (PHP)] as [rates_backend] lasts 4 weeks
+[Разработка frontend (React.js)] as [rates_frontend] lasts 3 weeks
+[Система прав доступа] as [rates_auth] lasts 2 weeks
+[Тестирование системы ставок] as [rates_test] lasts 2 weeks
+[Миграция данных из Excel] as [rates_migrate] lasts 1 week
+[Обучение пользователей] as [rates_train] lasts 1 week
+[Пилотный запуск] as [rates_pilot] lasts 2 weeks
+
+' Проектирование параллельно с мониторингом
+[rates_design] starts at [mon_prom]'s start
+
+' Разработка после готовности мониторинга (БД, backend, frontend параллельно)
+[rates_db] starts at [MS_MONITORING]'s start
+[rates_backend] starts at [MS_MONITORING]'s start
+[rates_frontend] starts at [MS_MONITORING]'s start
+[rates_auth] starts at [rates_backend]'s end
+[rates_test] starts at [rates_frontend]'s end
+[rates_test] starts at [rates_auth]'s end
+[rates_test] starts at [rates_db]'s end
+
+' Миграция и обучение параллельно
+[rates_migrate] starts at [rates_test]'s end
+[rates_train] starts at [rates_test]'s end
+[rates_pilot] starts at [rates_migrate]'s end
+[rates_pilot] starts at [rates_train]'s end
+
+[Система ставок в production] as [MS_RATES] happens at [rates_pilot]'s end
+
+-- Этап 2: Микросервис платежей --
+
+[Проектирование микросервиса платежей] as [pay_design] lasts 1 week
+[Разработка микросервиса платежей] as [pay_dev] lasts 3 weeks
+[Доработка интернет-банка] as [pay_ib] lasts 2 weeks
+[Тестирование платежей] as [pay_test] lasts 2 weeks
+[Внедрение микросервиса платежей] as [pay_deploy] lasts 1 week
+
+' Проектирование параллельно с проектированием ставок
+[pay_design] starts at [rates_design]'s start
+
+' Разработка после готовности мониторинга
+[pay_dev] starts at [MS_MONITORING]'s start
+[pay_ib] starts at [pay_dev]'s end
+[pay_test] starts at [pay_ib]'s end
+[pay_deploy] starts at [pay_test]'s end
+
+[Микросервис платежей готов] as [MS_PAYMENTS] happens at [pay_deploy]'s end
+
+-- Этап 3: Микросервис заявок + Kafka --
+
+[Проектирование микросервиса заявок] as [ord_design] lasts 1 week
+[Настройка Kafka] as [ord_kafka] lasts 2 weeks
+[Разработка БД заявок] as [ord_db] lasts 2 weeks
+[Разработка микросервиса заявок] as [ord_dev] lasts 4 weeks
+[Модернизация СМС-шлюза] as [ord_sms] lasts 2 weeks
+[Доработка интернет-банка (заявки)] as [ord_ib] lasts 3 weeks
+[Доработка веб-сайта (заявки)] as [ord_web] lasts 3 weeks
+[Тестирование заявок E2E] as [ord_test] lasts 2 weeks
+[Пилотный запуск заявок] as [ord_pilot] lasts 2 weeks
+
+' Проектирование параллельно с другими проектированиями
+[ord_design] starts at [rates_design]'s start
+
+' Kafka и БД после готовности мониторинга (параллельно)
+[ord_kafka] starts at [MS_MONITORING]'s start
+[ord_db] starts at [MS_MONITORING]'s start
+
+' Разработка после Kafka
+[ord_dev] starts at [ord_kafka]'s end
+[ord_sms] starts at [ord_kafka]'s end
+
+' Доработка фронтов параллельно
+[ord_ib] starts at [ord_dev]'s end
+[ord_web] starts at [ord_dev]'s end
+
+[ord_test] starts at [ord_ib]'s end
+[ord_test] starts at [ord_web]'s end
+[ord_test] starts at [ord_sms]'s end
+[ord_pilot] starts at [ord_test]'s end
+
+[Микросервис заявок в production] as [MS_ORDERS] happens at [ord_pilot]'s end
+
+-- Этап 4: Отображение ставок на фронтах --
+
+[Разработка API для фронтов] as [front_api] lasts 2 weeks
+[Система персонализации ставок] as [front_pers] lasts 2 weeks
+[Интеграция интернет-банка со ставками] as [front_ib] lasts 2 weeks
+[Интеграция веб-сайта со ставками] as [front_web] lasts 2 weeks
+[Тестирование отображения ставок] as [front_test] lasts 1 week
+[Внедрение на фронтах] as [front_deploy] lasts 1 week
+
+' API можно разрабатывать после завершения backend системы ставок
+[front_api] starts at [rates_backend]'s end
+
+' Персонализация и интеграции фронтов параллельно
+[front_pers] starts at [front_api]'s end
+[front_ib] starts at [front_api]'s end
+[front_web] starts at [front_api]'s end
+
+[front_test] starts at [front_ib]'s end
+[front_test] starts at [front_web]'s end
+[front_test] starts at [front_pers]'s end
+[front_deploy] starts at [front_test]'s end
+
+[Ставки отображаются клиентам] as [MS_FRONTEND_RATES] happens at [front_deploy]'s end
+
+-- Этап 5: CDN и балансировщик --
+
+[Настройка CDN (Nginx)] as [perf_cdn] lasts 2 weeks
+[Настройка балансировщика (HAProxy)] as [perf_lb] lasts 2 weeks
+[Подготовка резервного ЦОД] as [perf_dc] lasts 3 weeks
+[Доработка интернет-банка (HA)] as [perf_ib] lasts 2 weeks
+[Доработка веб-сайта (HA)] as [perf_web] lasts 2 weeks
+[Тестирование отказоустойчивости] as [perf_test] lasts 2 weeks
+[Развертывание HA] as [perf_deploy] lasts 1 week
+
+' CDN, балансировщик и ЦОД можно начать параллельно
+[perf_cdn] starts at [MS_MONITORING]'s start
+[perf_lb] starts at [MS_MONITORING]'s start
+[perf_dc] starts at [MS_MONITORING]'s start
+
+' Доработка фронтов параллельно после балансировщика
+[perf_ib] starts at [perf_lb]'s end
+[perf_web] starts at [perf_lb]'s end
+
+[perf_test] starts at [perf_ib]'s end
+[perf_test] starts at [perf_web]'s end
+[perf_test] starts at [perf_dc]'s end
+[perf_deploy] starts at [perf_test]'s end
+
+[Высокая доступность обеспечена] as [MS_HA] happens at [perf_deploy]'s end
+
+-- Этап 6: Передача ставок в колл-центры --
+
+[Развертывание SFTP-сервера] as [cc_sftp] lasts 2 weeks
+[Разработка модуля выгрузки] as [cc_export] lasts 3 weeks
+[Доработка платформы колл-центра банка] as [cc_internal] lasts 4 weeks
+[Координация с партнерским КЦ] as [cc_partner_coord] lasts 2 weeks
+[Интеграция с партнерским КЦ] as [cc_partner] lasts 3 weeks
+[Тестирование выгрузок] as [cc_test] lasts 2 weeks
+[Пилот с КЦ банка] as [cc_pilot_int] lasts 2 weeks
+[Подключение партнерского КЦ] as [cc_pilot_ext] lasts 2 weeks
+[Обучение операторов] as [cc_train] lasts 2 weeks
+
+' SFTP можно развернуть параллельно с разработкой
+[cc_sftp] starts at [MS_MONITORING]'s start
+
+' Модуль выгрузки можно начать после завершения backend системы ставок
+[cc_export] starts at [rates_backend]'s end
+
+' Доработка КЦ и координация параллельно с разработкой модуля
+[cc_internal] starts at [cc_export]'s start
+[cc_partner_coord] starts at [cc_export]'s start
+
+' Интеграция с партнером после согласования
+[cc_partner] starts at [cc_partner_coord]'s end
+
+' Тестирование после выгрузки и доработки КЦ
+[cc_test] starts at [cc_export]'s end
+[cc_test] starts at [cc_internal]'s end
+[cc_test] starts at [cc_sftp]'s end
+
+' Пилоты последовательно
+[cc_pilot_int] starts at [cc_test]'s end
+[cc_train] starts at [cc_pilot_int]'s start
+[cc_pilot_ext] starts at [cc_pilot_int]'s end
+[cc_pilot_ext] starts at [cc_partner]'s end
+
+[Колл-центры получают ставки] as [MS_CALLCENTERS] happens at [cc_pilot_ext]'s end
+
+-- Ключевые вехи MVP (6 месяцев) --
+
+[MVP Готов к запуску] as [MS_MVP] happens at [MS_CALLCENTERS]'s start
+[MS_MVP] happens at [MS_HA]'s start
+[MS_MVP] happens at [MS_ORDERS]'s start
+
+-- Пост-MVP развитие (6-12 месяцев) --
+
+[Аналитика и отчетность] as [post_analytics] lasts 6 weeks
+[Оптимизация процессов] as [post_opt] lasts 8 weeks
+[Расширение на другие продукты] as [post_expand] lasts 12 weeks
+[Мобильное приложение] as [post_mobile] lasts 16 weeks
+
+' Аналитика и оптимизация параллельно после MVP
+[post_analytics] starts at [MS_MVP]'s start
+[post_opt] starts at [MS_MVP]'s start
+
+' Расширение после оптимизации
+[post_expand] starts at [post_opt]'s end
+
+' Мобильное приложение параллельно
+[post_mobile] starts at [MS_MVP]'s start
+
+[Полная цифровая трансформация] as [MS_FULL] happens at [post_expand]'s end
+[MS_FULL] happens at [post_mobile]'s end
+
+@endgantt

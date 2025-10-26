@@ -1,0 +1,66 @@
+@startuml
+
+!include <C4/C4_Component>
+!include common/c4-custom-rel.iuml
+!include common/theme.iuml
+
+' LAYOUT_WITH_LEGEND()
+
+skinparam nodesep 64
+skinparam ranksep 64
+skinparam style strictuml
+skinparam NoteTextAlignment left
+<style>
+root{
+    Margin: 32
+}
+ComponentDiagram {
+    FontName: $FONT_NAME_LARGE
+}
+Arrow {
+    LineColor: Gray
+    LineThickness: 3
+    FontStyle: bold
+}
+Interface {
+    backgroundColor: $SYSTEM_BG_COLOR
+    .ext {
+        backgroundColor: $EXTERNAL_SYSTEM_BG_COLOR
+    }
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+Note {
+    BackgroundColor: cornsilk
+}
+</style>
+
+AddRelTag("interface", $lineThickness="8", $lineColor=$SYSTEM_BG_COLOR)
+AddRelTag("interface-ext", $lineThickness="8", $lineColor=$EXTERNAL_SYSTEM_BG_COLOR)
+
+title Диаграмма Компонентов\nВеб-сайт
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+Container(rates, "Система\nрасчёта\nставок", "PHP, React.js, Oracle")
+Container(orders, "Микросервис\nзаявок", "PHP")
+Person_Ext(digital_visitor, "Клиенты\nмолодого\nвозраста")
+Container(cdn, "CDN", "Nginx")
+Container_Boundary(website, "Веб-сайт") {
+    Component(website.pages, "Страницы / интерфейс", "React.js", "Рекламные баннеры,\nактуальные ставки,\nформа заявки")
+    Component(website.backend, "Бэкенд", "PHP")
+    Component(website.cache, "Кэш", "Redis / memcached", "Ставки и заявки")
+}
+
+Rel_U(website.backend, website.cache, "")
+Rel_R(website.backend, orders, "REST", "HTTPS")
+Rel_L(website.backend, rates, "REST", "HTTPS")
+Rel_U(digital_visitor, website.pages, "Web UI")
+Rel_L(cdn, website.pages, "Статический\nконтент", "HTTP")
+Rel_U(website.pages, website.backend, "REST", "HTTPS")
+
+@enduml
+
+

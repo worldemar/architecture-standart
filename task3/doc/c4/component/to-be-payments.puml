@@ -1,0 +1,51 @@
+@startuml
+
+!include <C4/C4_Component>
+!include common/c4-custom-rel.iuml
+!include common/theme.iuml
+
+skinparam nodesep 64
+skinparam ranksep 64
+skinparam style strictuml
+skinparam NoteTextAlignment left
+<style>
+root{
+    Margin: 32
+}
+ComponentDiagram {
+    FontName: $FONT_NAME_LARGE
+}
+Arrow {
+    LineColor: Gray
+    LineThickness: 3
+    FontStyle: bold
+}
+Interface {
+    backgroundColor: $SYSTEM_BG_COLOR
+    .ext {
+        backgroundColor: $EXTERNAL_SYSTEM_BG_COLOR
+    }
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+Note {
+    BackgroundColor: cornsilk
+}
+</style>
+
+title Диаграмма Компонентов\nМикросервис платежей
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+Container(abs.core, "АБС\nСервер", "Delphi", "Монолит")
+Container(internet_bank, "Интернет-банк", "ASP.NET, MVC 4.5")
+Container_Boundary(payments, "Микросервис платежей") {
+    Component(payments.core, "Микросервис\nплатежей", "PHP")
+}
+
+Rel_U(payments.core, abs.core, "SQL")
+Rel_U(internet_bank, payments.core, "REST", "HTTPS")
+
+@enduml

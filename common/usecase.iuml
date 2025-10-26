@@ -1,0 +1,55 @@
+@startuml
+
+<style>
+root {
+    Margin: 0
+}
+activityDiagram {
+    BackgroundColor: ivory
+    FontName: "Century Gothic"
+}
+Activity {
+    LineColor: Transparent
+    Padding: 0
+}
+Title {
+    Margin: 0
+    Padding: 0
+}
+Arrow {
+    LineColor: Transparent
+}
+</style>
+
+!procedure $UseCases($use_cases)
+:
+|=  № |= Действующие лица или системы |= Use Case |= Описание |
+!$usecase_index=1
+!foreach $use_case in $use_cases
+    !$steps_str = ""
+    !$steps_index = 1
+    !foreach $step in $use_case.steps
+        !if %strlen($steps_str) > 0
+            !$steps_str = $steps_str + %newline()
+        !endif
+        !$steps_str = $steps_str + $steps_index + ". " + $step 
+        !$steps_index = $steps_index + 1
+    !endfor
+    !$participants_str = ""
+    !foreach $participant in $use_case.participants
+        !if %strlen($participants_str) > 0
+            !$participants_str = $participants_str + %newline()
+        !endif
+        !$participants_str = $participants_str + $participant
+    !endfor
+    !$row_color = "#00000000"
+    !if %mod($usecase_index, 2) == 0
+        !$row_color = "#00000010"
+    !endif
+|<$row_color> $usecase_index |<$row_color>$participants_str|<$row_color>$use_case.name|<$row_color>$steps_str|
+    !$usecase_index = $usecase_index + 1
+!endfor
+;
+!endprocedure
+
+@enduml

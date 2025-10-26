@@ -1,0 +1,82 @@
+@startuml
+
+!include <C4/C4_Component>
+!include common/c4-custom-rel.iuml
+!include common/theme.iuml
+
+' LAYOUT_WITH_LEGEND()
+
+skinparam nodesep 64
+skinparam ranksep 64
+skinparam style strictuml
+skinparam NoteTextAlignment left
+<style>
+root{
+    Margin: 32
+}
+ComponentDiagram {
+    FontName: $FONT_NAME_LARGE
+}
+Arrow {
+    LineColor: Gray
+    LineThickness: 3
+    FontStyle: bold
+}
+Interface {
+    backgroundColor: $SYSTEM_BG_COLOR
+    .ext {
+        backgroundColor: $EXTERNAL_SYSTEM_BG_COLOR
+    }
+}
+Legend {
+    BackgroundColor: Transparent
+    LineThickness: 0
+}
+Note {
+    BackgroundColor: cornsilk
+}
+</style>
+
+AddRelTag("interface", $lineThickness="8", $lineColor=$SYSTEM_BG_COLOR)
+AddRelTag("interface-ext", $lineThickness="8", $lineColor=$EXTERNAL_SYSTEM_BG_COLOR)
+
+title Диаграмма Контейнеров\nСистема Расчёта Ставок
+header Банк «Стандарт»
+footer Опубликовано %date("d MMM YYYY")
+
+Person(back_office, "Бэк-офис", "100 человек")
+Person(front_office, "Фронт-офис", "500 человек в 50 отделений")
+
+Container_Boundary(rates, "Система расчёта ставок") {
+    Component(rates.webui, "Веб-интерфейс", "React.js")
+    Component(rates.backend, "Бэкенд", "PHP", "автоматизация\nрасчёта ставок")
+    Component(rates.export, "Генератор файлов", "PHP", "генерация файлов\nс актуальными ставками")
+    Component(rates.memcache, "Кэш текущего состояния ставок", "Redis / memcached")
+    ComponentDb(rates.db, "База данных", "Oracle", "ставки")
+}
+
+System_Ext(call_center_platform, "Платформа для колл-центра", "//React.js, Java Spring, PostgreSQL//")
+System_Ext(call_center_ext_platform, "Платформа для колл-центра партнёра", "")
+
+Container(sftp_server, "Файловое хранилище", "SFTP")
+
+Container(website, "Веб-сайт", "PHP, React.js")
+Container(internet_bank, "Интернет-банк", "ASP.NET, MVC 4.5")
+
+Rel_L(rates.backend, rates.db, "SQL")
+Rel_U(website, rates.backend, "REST", "HTTPS")
+Rel_D(rates.webui, rates.backend, "REST", "HTTPS")
+Rel_U(internet_bank, rates.backend, "REST", "HTTPS")
+Rel_R(rates.backend, rates.memcache, "")
+
+Rel_R(front_office, rates.webui, "Web UI\nClient")
+Rel_D(back_office, rates.webui, "Web UI\nClient")
+
+Rel_U(rates.backend, rates.export, "REST", "HTTP")
+Rel_D(rates.export, rates.memcache, "чтение\nтекущих\nставок")
+Rel_R(rates.export, sftp_server, "Выгрузка\nфайлов\nсо ставками", "SFTP")
+Rel_D(call_center_platform, sftp_server, "Скачивание\nфайлов\nсо ставками", "SFTP")
+Rel_D(call_center_ext_platform, sftp_server, "Скачивание\nфайлов\nсо ставками", "SFTP")
+
+Lay_R(front_office, back_office)
+@enduml
